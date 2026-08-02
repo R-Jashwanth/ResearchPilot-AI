@@ -87,9 +87,12 @@ export default function App() {
         method: 'POST',
         body: formData,
       });
+      const data = await res.json();
       if (res.ok) {
         await fetchDocs();
         await fetchStats();
+      } else {
+        console.error('Upload failed:', data.error);
       }
     } catch (error) {
       console.error('Upload failed:', error);
@@ -239,7 +242,7 @@ export default function App() {
     setInput('');
     setIsLoading(true);
 
-    const modelMsgIdx = messages.length + 1; // used for tracking message index
+    const modelMsgIdx = messages.length + 1; // tracks position of the model message being streamed
     setMessages(prev => [...prev, { role: 'model', text: '', isStreaming: true, timeline: { parsing: true, chunking: true, embedding: true, search: true, topK: false, retrieved: false, generation: false, verified: false } }]);
 
     try {
