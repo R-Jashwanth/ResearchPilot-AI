@@ -1,0 +1,6 @@
+{
+  "name": "ResearchPilot AI",
+  "description": "An evidence-based research assistant that strictly answers questions based on user-provided document context, designed with a retro-futuristic glitch art interface.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
