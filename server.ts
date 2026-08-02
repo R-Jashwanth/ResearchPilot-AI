@@ -26,20 +26,14 @@ async function startServer() {
   app.use(express.json());
 
   const apiKey = process.env.GEMINI_API_KEY || '';
-  const isOAuthToken = apiKey.startsWith('AQ.');
 
-  // Embedding via direct fetch — SDK doesn't support OAuth tokens for embedContent
+  // Direct fetch for embeddings (more reliable than SDK for all key types)
   const EMBED_MODEL = 'gemini-embedding-exp-03-07';
   async function embedText(text: string): Promise<number[]> {
-    const url = isOAuthToken
-      ? `https://generativelanguage.googleapis.com/v1beta/models/${EMBED_MODEL}:embedContent`
-      : `https://generativelanguage.googleapis.com/v1beta/models/${EMBED_MODEL}:embedContent?key=${apiKey}`;
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    if (isOAuthToken) headers['Authorization'] = `Bearer ${apiKey}`;
-
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${EMBED_MODEL}:embedContent?key=${apiKey}`;
     const resp = await fetch(url, {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: `models/${EMBED_MODEL}`, content: { parts: [{ text }] } }),
     });
     const json = await resp.json() as any;
@@ -48,13 +42,10 @@ async function startServer() {
   }
 
   const ai = new GoogleGenAI({
-    apiKey: isOAuthToken ? 'placeholder' : apiKey,
+    apiKey,
     httpOptions: {
       apiVersion: 'v1beta',
-      headers: {
-        'User-Agent': 'aistudio-build',
-        ...(isOAuthToken ? { 'Authorization': `Bearer ${apiKey}` } : {})
-      }
+      headers: { 'User-Agent': 'researchpilot-ai' }
     }
   });
 
