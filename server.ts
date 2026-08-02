@@ -85,6 +85,9 @@ async function startServer() {
   app.post('/api/search', async (req, res) => {
     try {
       const { query } = req.body;
+      if (!query?.trim()) return res.status(400).json({ error: 'Query is required' });
+      if (vectorStore.length === 0) return res.json({ results: [] });
+
       const qEmbedding = await embedText(query);
       if (!qEmbedding.length) throw new Error("Failed to generate query embedding");
 
@@ -256,6 +259,15 @@ async function startServer() {
 
     try {
       const { question } = req.body;
+      if (!question?.trim()) {
+        res.write(`data: ${JSON.stringify({ error: 'Question is required' })}\n\n`);
+        return res.end();
+      }
+      if (vectorStore.length === 0) {
+        res.write(`data: ${JSON.stringify({ type: 'text', text: 'No documents uploaded yet. Please upload documents first.' })}\n\n`);
+        res.write('data: [DONE]\n\n');
+        return res.end();
+      }
       const startTime = Date.now();
       
       const qEmbedding = await embedText(question);
